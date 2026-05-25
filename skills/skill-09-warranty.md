@@ -234,9 +234,9 @@ const WARRANTY_STATUS_LABEL = {
 [ ] POST /warranty khi order completed, product đúng → tạo thành công
 [ ] POST /warranty sản phẩm hết hạn bảo hành → flash error
 [ ] POST /warranty product không thuộc order → flash error
-[ ] GET /profile/warranty → danh sách yêu cầu bảo hành của user
-[ ] GET /admin/warranty → admin thấy tất cả yêu cầu
-[ ] PATCH /admin/warranty/:id pending→approved → cập nhật đúng
+[x] GET /profile/warranty → danh sách yêu cầu bảo hành của user
+[x] GET /admin/warranty → admin thấy tất cả yêu cầu
+[x] PATCH /admin/warranty/:id pending→approved → cập nhật đúng
 [ ] PATCH /admin/warranty/:id pending→processing → flash error (transition không hợp lệ)
 [ ] PATCH /admin/warranty/:id completed→bất kỳ → flash error
 [ ] Chỉ hiện nút bảo hành nếu sản phẩm có warranty_months > 0

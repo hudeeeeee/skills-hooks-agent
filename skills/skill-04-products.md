@@ -440,21 +440,21 @@ module.exports = router;
 ## Checklist xác nhận ✅
 
 ```
-[ ] GET / → trang chủ hiển thị sản phẩm sale, mới nhất, rating cao
-[ ] GET /products → danh sách 12 sản phẩm/trang
-[ ] GET /products?keyword=iphone → lọc đúng theo tên/brand
-[ ] GET /products?category=dien-thoai-phu-kien → lọc đúng danh mục
+[x] GET / → trang chủ hiển thị sản phẩm sale, mới nhất, rating cao
+[x] GET /products → danh sách 12 sản phẩm/trang
+[x] GET /products?keyword=iphone → lọc đúng theo tên/brand
+[x] GET /products?category=dien-thoai-phu-kien → lọc đúng danh mục
 [ ] GET /products?minPrice=5000000&maxPrice=20000000 → lọc đúng khoảng giá
-[ ] GET /products?onSale=1 → chỉ hiện SP giảm giá
-[ ] GET /products?sort=price_asc → sắp xếp đúng
-[ ] Pagination: trang 2 hiển thị đúng, không crash nếu page > totalPages
-[ ] GET /products/:slug sản phẩm tồn tại → chi tiết đầy đủ
-[ ] GET /products/slug-khong-ton-tai → 404
-[ ] Sản phẩm hết hàng: button "Hết hàng" disabled, không có form add-to-cart
-[ ] Sản phẩm có sale_price → hiển thị giá giảm + badge % off
-[ ] Ảnh lazy load, fallback /images/no-image.png nếu lỗi
-[ ] GET /categories/:slug → render đúng danh mục
-[ ] Sản phẩm liên quan hiện ở trang detail
+[x] GET /products?onSale=1 → chỉ hiện SP giảm giá
+[x] GET /products?sort=price_asc → sắp xếp đúng
+[x] Pagination: trang 2 hiển thị đúng, không crash nếu page > totalPages
+[x] GET /products/:slug sản phẩm tồn tại → chi tiết đầy đủ
+[x] GET /products/slug-khong-ton-tai → 404
+[x] Sản phẩm hết hàng: button "Hết hàng" disabled, không có form add-to-cart
+[x] Sản phẩm có sale_price → hiển thị giá giảm + badge % off
+[x] Ảnh lazy load, fallback /images/no-image.png nếu lỗi
+[x] GET /categories/:slug → render đúng danh mục
+[x] Sản phẩm liên quan hiện ở trang detail
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 04`

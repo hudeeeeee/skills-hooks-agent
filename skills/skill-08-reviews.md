@@ -251,16 +251,16 @@ document.querySelectorAll('.star-rating').forEach(container => {
 ## Checklist xác nhận ✅
 
 ```
-[ ] POST /reviews khi order pending → flash error "chưa hoàn thành"
-[ ] POST /reviews khi order completed đúng product → tạo review thành công
-[ ] POST /reviews lần 2 cùng product+order → flash error "đã đánh giá"
-[ ] POST /reviews product không thuộc order → flash error
-[ ] rating = 0 hoặc > 5 → flash error validate
-[ ] Sau khi tạo review: products.avg_rating cập nhật đúng
-[ ] Sau khi tạo review: products.review_count tăng đúng
-[ ] Review hiển thị trên trang chi tiết sản phẩm (visible only)
-[ ] Button "Đánh giá" chỉ xuất hiện khi order_status = completed
-[ ] Button "Đã đánh giá" sau khi review xong
+[x] POST /reviews khi order pending → flash error "chưa hoàn thành"
+[x] POST /reviews khi order completed đúng product → tạo review thành công
+[x] POST /reviews lần 2 cùng product+order → flash error "đã đánh giá"
+[x] POST /reviews product không thuộc order → flash error
+[x] rating = 0 hoặc > 5 → flash error validate
+[x] Sau khi tạo review: products.avg_rating cập nhật đúng
+[x] Sau khi tạo review: products.review_count tăng đúng
+[x] Review hiển thị trên trang chi tiết sản phẩm (visible only)
+[x] Button "Đánh giá" chỉ xuất hiện khi order_status = completed
+[x] Button "Đã đánh giá" sau khi review xong
 [ ] Star rating UI hoạt động (hover, click)
 [ ] Admin ẩn review → avg_rating được recalculate
 ```

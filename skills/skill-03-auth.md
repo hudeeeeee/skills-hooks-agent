@@ -302,18 +302,18 @@ Trong `src/views/partials/navbar.ejs`:
 ## Checklist xác nhận ✅
 
 ```
-[ ] POST /register với email mới → tạo user, redirect /login với flash success
-[ ] POST /register với email đã tồn tại → flash error, không insert
-[ ] POST /register với password không khớp → flash error
-[ ] POST /login đúng thông tin → session được tạo, redirect đúng theo role
-[ ] POST /login sai password → flash error, không tạo session
-[ ] POST /login tài khoản blocked → flash "tài khoản bị khoá"
-[ ] POST /logout → session bị destroy, redirect /login
-[ ] GET /cart khi chưa đăng nhập → redirect /login?returnUrl=/cart
-[ ] Sau đăng nhập → redirect về returnUrl đúng
-[ ] password_hash không bao giờ xuất hiện trong session hoặc view
-[ ] Admin đăng nhập → redirect /admin/dashboard
-[ ] Customer đăng nhập → redirect /
+[x] POST /register với email mới → tạo user, redirect /login với flash success
+[x] POST /register với email đã tồn tại → flash error, không insert
+[x] POST /register với password không khớp → flash error
+[x] POST /login đúng thông tin → session được tạo, redirect đúng theo role
+[x] POST /login sai password → flash error, không tạo session
+[x] POST /login tài khoản blocked → flash "tài khoản bị khoá"
+[x] POST /logout → session bị destroy, redirect /login
+[x] GET /cart khi chưa đăng nhập → redirect /login?returnUrl=/cart
+[x] Sau đăng nhập → redirect về returnUrl đúng
+[x] password_hash không bao giờ xuất hiện trong session hoặc view
+[x] Admin đăng nhập → redirect /admin/dashboard
+[x] Customer đăng nhập → redirect /
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 03`

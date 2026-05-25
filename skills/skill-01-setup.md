@@ -479,14 +479,14 @@ module.exports = router;
 ## Checklist xác nhận ✅
 
 ```
-[ ] npm install không lỗi
-[ ] node server.js → "Database connected" + "Server running"
-[ ] http://localhost:3000 → trả về trang chủ, không lỗi 500
-[ ] Layout main.ejs render không lỗi EJS syntax
-[ ] Flash message hiển thị và tự ẩn sau 4 giây
-[ ] Static files (CSS, JS) load được
-[ ] req.session.user = null khi chưa đăng nhập → navbar hiển thị "Đăng nhập"
-[ ] URL không tồn tại → trang 404 đẹp
+[x] npm install không lỗi
+[x] node server.js → "Database connected" + "Server running"
+[x] http://localhost:3000 → trả về trang chủ, không lỗi 500
+[x] Layout main.ejs render không lỗi EJS syntax
+[x] Flash message hiển thị và tự ẩn sau 4 giây
+[x] Static files (CSS, JS) load được
+[x] req.session.user = null khi chưa đăng nhập → navbar hiển thị "Đăng nhập"
+[x] URL không tồn tại → trang 404 đẹp
 ```
 
 ## Sau khi xong skill này

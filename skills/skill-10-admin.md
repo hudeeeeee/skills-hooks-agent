@@ -456,24 +456,24 @@ module.exports = router;
 ## Checklist xác nhận ✅
 
 ```
-[ ] GET /admin/dashboard → hiển thị: tổng doanh thu, số đơn theo trạng thái, top 5 SP, low stock
-[ ] GET /admin/products → danh sách có phân trang, tìm kiếm, lọc theo danh mục/trạng thái
-[ ] GET /admin/products/create → form đầy đủ
-[ ] POST /admin/products → tạo sản phẩm + upload ảnh thành công
+[x] GET /admin/dashboard → hiển thị: tổng doanh thu, số đơn theo trạng thái, top 5 SP, low stock
+[x] GET /admin/products → danh sách có phân trang, tìm kiếm, lọc theo danh mục/trạng thái
+[x] GET /admin/products/create → form đầy đủ
+[x] POST /admin/products → tạo sản phẩm + upload ảnh thành công
 [ ] POST /admin/products/:id → cập nhật sản phẩm đúng
 [ ] POST /admin/products/:id/delete SP có đơn → status=inactive, không xóa cứng
 [ ] POST /admin/products/:id/delete SP chưa có đơn → xóa cứng + xóa ảnh
-[ ] GET /admin/orders → lọc theo status, tìm theo order_code/tên khách
-[ ] GET /admin/orders/:id → chi tiết đầy đủ
-[ ] POST /admin/orders/:id/status valid transition → update thành công + trừ/hoàn kho
+[x] GET /admin/orders → lọc theo status, tìm theo order_code/tên khách
+[x] GET /admin/orders/:id → chi tiết đầy đủ
+[x] POST /admin/orders/:id/status valid transition → update thành công + trừ/hoàn kho
 [ ] POST /admin/orders/:id/status invalid transition → flash error
-[ ] GET /admin/users → danh sách users
-[ ] POST /admin/users/:id/status → block/unblock
-[ ] Không cho block admin account
-[ ] GET /admin/reviews → danh sách đánh giá
-[ ] POST /admin/reviews/:id/status → ẩn/hiện, avg_rating recalculate
-[ ] Customer truy cập /admin/* → 403
-[ ] Chưa đăng nhập truy cập /admin/* → redirect /login
+[x] GET /admin/users → danh sách users
+[x] POST /admin/users/:id/status → block/unblock
+[x] Không cho block admin account
+[x] GET /admin/reviews → danh sách đánh giá
+[x] POST /admin/reviews/:id/status → ẩn/hiện, avg_rating recalculate
+[x] Customer truy cập /admin/* → 403
+[x] Chưa đăng nhập truy cập /admin/* → redirect /login
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 10`

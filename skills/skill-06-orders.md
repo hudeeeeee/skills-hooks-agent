@@ -353,20 +353,20 @@ app.use((req, res, next) => {
 ## Checklist xác nhận ✅
 
 ```
-[ ] GET /checkout khi giỏ rỗng → redirect /cart với flash error
-[ ] GET /checkout → hiển thị địa chỉ user, phương thức thanh toán, tổng tiền
-[ ] POST /orders COD → tạo order + order_items + payment, xóa cart, redirect /orders/:code
-[ ] POST /orders → order_code là UNIQUE, format ORD-YYYYMMDD-XXXXX
-[ ] POST /orders khi stock không đủ → flash error, ROLLBACK, cart không xóa
-[ ] Transaction: nếu lỗi giữa chừng → ROLLBACK, không có orphan data
-[ ] GET /orders → danh sách đơn của user, không thấy đơn user khác
-[ ] GET /orders/:code → chi tiết đầy đủ
-[ ] GET /orders/:code của user khác → 404
-[ ] POST /orders/:code/cancel status=pending → hủy được
-[ ] POST /orders/:code/cancel status=completed → flash error "không thể hủy"
-[ ] Hủy đơn confirmed → hoàn tồn kho đúng
-[ ] Badge trạng thái đúng màu
-[ ] Phí ship = 0 nếu subtotal >= 2,000,000đ
+[x] GET /checkout khi giỏ rỗng → redirect /cart với flash error
+[x] GET /checkout → hiển thị địa chỉ user, phương thức thanh toán, tổng tiền
+[x] POST /orders COD → tạo order + order_items + payment, xóa cart, redirect /orders/:code
+[x] POST /orders → order_code là UNIQUE, format ORD-YYYYMMDD-XXXXX
+[x] POST /orders khi stock không đủ → flash error, ROLLBACK, cart không xóa
+[x] Transaction: nếu lỗi giữa chừng → ROLLBACK, không có orphan data
+[x] GET /orders → danh sách đơn của user, không thấy đơn user khác
+[x] GET /orders/:code → chi tiết đầy đủ
+[x] GET /orders/:code của user khác → 404
+[x] POST /orders/:code/cancel status=pending → hủy được
+[x] POST /orders/:code/cancel status=completed → flash error "không thể hủy"
+[x] Hủy đơn confirmed → hoàn tồn kho đúng
+[x] Badge trạng thái đúng màu
+[x] Phí ship = 0 nếu subtotal >= 2,000,000đ
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 06`

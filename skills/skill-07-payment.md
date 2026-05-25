@@ -320,17 +320,17 @@ module.exports = { getBankInfo, createVNPayUrl, vnpayReturn, vnpayIPN };
 ## Checklist xác nhận ✅
 
 ```
-[ ] COD: order.payment_status = 'unpaid' sau khi tạo đơn
-[ ] GET /payment/bank-info/:code → hiển thị đúng thông tin ngân hàng
-[ ] Nội dung CK = order_code (copy-paste rõ ràng)
-[ ] GET /payment/vnpay/create → tạo URL đúng với amount * 100
-[ ] SecureHash được tạo đúng (HMAC-SHA512)
-[ ] GET /payment/vnpay/return?vnp_ResponseCode=00 → verify hash → update paid → redirect success
-[ ] GET /payment/vnpay/return hash sai → flash error, không update DB
-[ ] POST /payment/vnpay/ipn → idempotent (gọi 2 lần không update 2 lần)
+[x] COD: order.payment_status = 'unpaid' sau khi tạo đơn
+[x] GET /payment/bank-info/:code → hiển thị đúng thông tin ngân hàng
+[x] Nội dung CK = order_code (copy-paste rõ ràng)
+[x] GET /payment/vnpay/create → tạo URL đúng với amount * 100
+[x] SecureHash được tạo đúng (HMAC-SHA512)
+[x] GET /payment/vnpay/return?vnp_ResponseCode=00 → verify hash → update paid → redirect success
+[x] GET /payment/vnpay/return hash sai → flash error, không update DB
+[x] POST /payment/vnpay/ipn → idempotent (gọi 2 lần không update 2 lần)
 [ ] Sau payment thành công → stock bị trừ đúng
 [ ] payment.paid_at được set chính xác
-[ ] Không có 2 payment record cho 1 order
+[x] Không có 2 payment record cho 1 order
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 07`

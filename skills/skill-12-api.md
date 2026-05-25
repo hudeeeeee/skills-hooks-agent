@@ -239,29 +239,29 @@ Xem SPEC.md mục 2.2
 
 ```
 ROUTES:
-[ ] Tất cả route trong bảng audit tồn tại, không 404
+[x] Tất cả route trong bảng audit tồn tại, không 404
 [ ] POST route không accessible qua GET
-[ ] Route không tồn tại → 404 đẹp
+[x] Route không tồn tại → 404 đẹp
 
 SECURITY:
-[ ] Không có plain password trong DB
-[ ] /admin/* bị block với customer (403) và guest (redirect login)
-[ ] User A không xem đơn/địa chỉ user B
+[x] Không có plain password trong DB
+[x] /admin/* bị block với customer (403) và guest (redirect login)
+[x] User A không xem đơn/địa chỉ user B
 [ ] SQL injection không thực hiện được
 [ ] XSS input được escape
 
 BUSINESS LOGIC:
-[ ] Order flow đầy đủ: tạo → xác nhận → giao → hoàn thành
-[ ] Stock không bao giờ âm
-[ ] Payment chỉ set paid sau verify
-[ ] Review chỉ sau completed
+[x] Order flow đầy đủ: tạo → xác nhận → giao → hoàn thành
+[x] Stock không bao giờ âm
+[x] Payment chỉ set paid sau verify
+[x] Review chỉ sau completed
 
 PRODUCTION READY:
-[ ] .env không commit (trong .gitignore)
+[x] .env không commit (trong .gitignore)
 [ ] Upload dir trong .gitignore (giữ .gitkeep)
 [ ] NODE_ENV=production ẩn stack trace
 [ ] README.md đầy đủ hướng dẫn
-[ ] package.json có start script
+[x] package.json có start script
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 12`

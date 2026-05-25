@@ -191,15 +191,15 @@ console.log('Products in DB:', rows[0].cnt);
 ## Checklist xác nhận ✅
 
 ```
-[ ] schema.sql chạy không lỗi, 12 bảng được tạo
-[ ] seed.sql chạy không lỗi
-[ ] SELECT COUNT(*) FROM users → 3 rows
-[ ] SELECT COUNT(*) FROM products → 10 rows
-[ ] SELECT COUNT(*) FROM categories → 8 rows
-[ ] FK constraint hoạt động: thử INSERT cart_item với product_id không tồn tại → lỗi FK
-[ ] UNIQUE constraint hoạt động: thử INSERT users với email trùng → lỗi UNIQUE
-[ ] Pool kết nối từ Node.js: pool.query('SELECT 1') không throw
-[ ] Password admin được hash (không phải plain text)
+[x] schema.sql chạy không lỗi, 12 bảng được tạo
+[x] seed.sql chạy không lỗi
+[x] SELECT COUNT(*) FROM users → 3 rows
+[x] SELECT COUNT(*) FROM products → 10 rows
+[x] SELECT COUNT(*) FROM categories → 8 rows
+[x] FK constraint hoạt động: thử INSERT cart_item với product_id không tồn tại → lỗi FK
+[x] UNIQUE constraint hoạt động: thử INSERT users với email trùng → lỗi UNIQUE
+[x] Pool kết nối từ Node.js: pool.query('SELECT 1') không throw
+[x] Password admin được hash (không phải plain text)
 ```
 
 ## Sau khi xong skill này

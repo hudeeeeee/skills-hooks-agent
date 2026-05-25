@@ -422,18 +422,18 @@ document.addEventListener('DOMContentLoaded', () => {
 ## Checklist xác nhận ✅
 
 ```
-[ ] GET /cart khi chưa đăng nhập → redirect /login
-[ ] GET /cart khi giỏ rỗng → hiển thị empty state
-[ ] POST /cart/add → item xuất hiện trong giỏ, badge cart-count cập nhật
-[ ] POST /cart/add sản phẩm đã có → tăng quantity, không tạo row mới
-[ ] POST /cart/add quantity > stock → flash error, không insert
-[ ] POST /cart/add sản phẩm hết hàng → flash error
-[ ] PATCH /cart/items/:id → cập nhật quantity, tổng tiền update AJAX
-[ ] DELETE /cart/items/:id → xóa item, tổng tiền update
-[ ] Item trong giỏ của user A không bị ảnh hưởng bởi user B
-[ ] Tổng tiền = SUM(price_at_time * quantity)
-[ ] Phí vận chuyển = 0 nếu subtotal >= 2,000,000đ, ngược lại 50,000đ
-[ ] Cart badge trên navbar cập nhật real-time
+[x] GET /cart khi chưa đăng nhập → redirect /login
+[x] GET /cart khi giỏ rỗng → hiển thị empty state
+[x] POST /cart/add → item xuất hiện trong giỏ, badge cart-count cập nhật
+[x] POST /cart/add sản phẩm đã có → tăng quantity, không tạo row mới
+[x] POST /cart/add quantity > stock → flash error, không insert
+[x] POST /cart/add sản phẩm hết hàng → flash error
+[x] PATCH /cart/items/:id → cập nhật quantity, tổng tiền update AJAX
+[x] DELETE /cart/items/:id → xóa item, tổng tiền update
+[x] Item trong giỏ của user A không bị ảnh hưởng bởi user B
+[x] Tổng tiền = SUM(price_at_time * quantity)
+[x] Phí vận chuyển = 0 nếu subtotal >= 2,000,000đ, ngược lại 50,000đ
+[x] Cart badge trên navbar cập nhật real-time
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 05`

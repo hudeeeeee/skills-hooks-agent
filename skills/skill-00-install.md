@@ -389,20 +389,20 @@ node server.js
 ## Checklist xác nhận ✅
 
 ```
-[ ] node_modules/ tồn tại
-[ ] npm install không có ERROR (warning OK)
-[ ] package.json có đúng 9 dependencies + 1 devDependency
-[ ] multer version = 1.4.5-lts.1 (không phải 2.x)
-[ ] Tất cả thư mục trong Bước 5 tồn tại
-[ ] .env tồn tại và đã điền DB_PASS
-[ ] SESSION_SECRET đã đổi khỏi default
-[ ] .gitignore tồn tại, có node_modules và .env
-[ ] public/uploads/.gitkeep tồn tại
-[ ] Database electronics_shop tồn tại trong MySQL
-[ ] node verify-script (Bước 3c) → 9 packages ✅ + 3 built-in ✅
-[ ] MySQL connection test (Bước 10) → ✅ connected
-[ ] node server.js → "Server: http://localhost:3000"
-[ ] curl http://localhost:3000 hoặc browser → "ElectroShop — OK"
+[x] node_modules/ tồn tại
+[x] npm install không có ERROR (warning OK)
+[x] package.json có đúng 9 dependencies + 1 devDependency
+[x] multer version = 1.4.5-lts.1 (không phải 2.x)
+[x] Tất cả thư mục trong Bước 5 tồn tại
+[x] .env tồn tại và đã điền DB_PASS
+[x] SESSION_SECRET đã đổi khỏi default
+[x] .gitignore tồn tại, có node_modules và .env
+[x] public/uploads/.gitkeep tồn tại
+[x] Database electronics_shop tồn tại trong MySQL
+[x] node verify-script (Bước 3c) → 9 packages ✅ + 3 built-in ✅
+[x] MySQL connection test (Bước 10) → ✅ connected
+[x] node server.js → "Server: http://localhost:3000"
+[x] curl http://localhost:3000 hoặc browser → "ElectroShop — OK"
 ```
 
 ## Sau khi xong: chạy Skill 01
