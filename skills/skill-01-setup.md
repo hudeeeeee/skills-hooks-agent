@@ -336,9 +336,12 @@ module.exports = { hash, compare };
 
 ---
 
-## Bước 9 — Layout EJS
+## Bước 9 — Layout EJS (Top/Bot Partial Pattern)
 
-**src/views/layouts/main.ejs** (khung tổng quát):
+> **QUAN TRỌNG:** KHÔNG dùng `<%- include(layout, { body: \`...\` }) %>` — EJS tokenizer crash khi body chứa `<% %>` tags.
+> Pattern đúng: mỗi view tự include top/bot partials.
+
+**src/views/partials/top.ejs** (mở HTML, navbar, flash):
 ```html
 <!DOCTYPE html>
 <html lang="vi">
@@ -351,16 +354,83 @@ module.exports = { hash, compare };
   <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
-  <%- include('../partials/navbar') %>
-  <%- include('../partials/flash') %>
+  <%- include('./navbar') %>
+  <%- include('./flash') %>
   <main class="container py-4">
-    <%- body %>
+```
+
+**src/views/partials/bot.ejs** (đóng main, footer, scripts):
+```html
   </main>
-  <%- include('../partials/footer') %>
+  <%- include('./footer') %>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/main.js"></script>
 </body>
 </html>
+```
+
+**src/views/partials/admin-top.ejs** (admin layout mở):
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title + ' | Admin' : 'Admin | ElectroShop' %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="d-flex" style="min-height:100vh">
+  <!-- Sidebar -->
+  <nav class="bg-dark text-white" style="width:220px;min-height:100vh">
+    <div class="p-3 border-bottom border-secondary">
+      <a href="/admin" class="text-white text-decoration-none fw-bold fs-5">
+        <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Admin
+      </a>
+    </div>
+    <ul class="nav flex-column p-2 gap-1">
+      <li><a href="/admin/dashboard" class="nav-link text-white-50 hover-white"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+      <li><a href="/admin/products" class="nav-link text-white-50"><i class="bi bi-box-seam me-2"></i>Sản phẩm</a></li>
+      <li><a href="/admin/orders" class="nav-link text-white-50"><i class="bi bi-bag me-2"></i>Đơn hàng</a></li>
+      <li><a href="/admin/categories" class="nav-link text-white-50"><i class="bi bi-tags me-2"></i>Danh mục</a></li>
+      <li><a href="/admin/users" class="nav-link text-white-50"><i class="bi bi-people me-2"></i>Người dùng</a></li>
+      <li><a href="/admin/reviews" class="nav-link text-white-50"><i class="bi bi-star me-2"></i>Đánh giá</a></li>
+      <li><a href="/admin/warranty" class="nav-link text-white-50"><i class="bi bi-shield-check me-2"></i>Bảo hành</a></li>
+      <li class="mt-3"><a href="/logout" class="nav-link text-danger"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+    </ul>
+  </nav>
+  <!-- Main content -->
+  <div class="flex-grow-1 p-4 bg-light">
+    <%- include('./flash') %>
+```
+
+**src/views/partials/admin-bot.ejs** (admin layout đóng):
+```html
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
+```
+
+**Cách dùng trong mỗi view** (ví dụ `pages/home.ejs`):
+```ejs
+<%- include('../../partials/top') %>
+<h1>Nội dung trang</h1>
+<% someArray.forEach(item => { %>
+  <p><%= item.name %></p>
+<% }); %>
+<%- include('../../partials/bot') %>
+```
+
+**Cách dùng trong admin view** (ví dụ `admin/products/index.ejs`):
+```ejs
+<%- include('../../partials/admin-top') %>
+<h4>Nội dung admin</h4>
+<%- include('../../partials/admin-bot') %>
 ```
 
 **src/views/partials/flash.ejs:**

@@ -129,16 +129,17 @@ async function getDashboardStats() {
   );
 
   // Top 5 sản phẩm bán chạy
+  // MySQL only_full_group_by: phải GROUP BY p.name, dùng ANY_VALUE cho non-aggregated column
   const [topProducts] = await pool.query(
     `SELECT p.name, SUM(oi.quantity) AS total_sold,
             SUM(oi.total_price) AS total_revenue,
-            pi.image_url AS main_image
+            ANY_VALUE(pi.image_url) AS main_image
      FROM order_items oi
      JOIN products p ON oi.product_id = p.id
      JOIN orders o ON oi.order_id = o.id
      LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_main = 1
      WHERE o.order_status = 'completed'
-     GROUP BY oi.product_id ORDER BY total_sold DESC LIMIT 5`
+     GROUP BY oi.product_id, p.name ORDER BY total_sold DESC LIMIT 5`
   );
 
   // Sản phẩm sắp hết hàng (≤ 5)

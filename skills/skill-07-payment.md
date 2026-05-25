@@ -126,7 +126,7 @@ function verifyVNPayReturn(query) {
   delete params.vnp_SecureHashType;
 
   const sorted = sortObject(params);
-  const signData = querystring.stringify(sorted, { encode: false });
+  const signData = querystring.stringify(sorted, { encode: false });w
   const hmac = crypto.createHmac('sha512', process.env.VNPAY_HASH_SECRET);
   const checkHash = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 

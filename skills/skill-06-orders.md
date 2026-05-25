@@ -44,9 +44,9 @@ async function createOrder(userId, { address_id, shipping_name, shipping_phone, 
     );
     if (!addrRows.length) return { success: false, error: 'Địa chỉ không hợp lệ' };
     const addr = addrRows[0];
-    finalName = addr.receiver_name;
-    finalPhone = addr.receiver_phone;
-    finalAddress = `${addr.detail}, ${addr.ward}, ${addr.district}, ${addr.province}`;
+    finalName = addr.recipient_name;
+    finalPhone = addr.phone;
+    finalAddress = `${addr.address_line}, ${addr.ward}, ${addr.district}, ${addr.province}`;
   }
   if (!finalName || !finalPhone || !finalAddress) {
     return { success: false, error: 'Vui lòng nhập đầy đủ thông tin giao hàng' };

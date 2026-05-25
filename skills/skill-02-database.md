@@ -37,18 +37,24 @@ Sao chép toàn bộ SQL DDL từ SPEC.md mục 3.3. Đây là thứ tự ĐÚNG
 USE electronics_shop;
 
 -- ============================================================
--- ADMIN + CUSTOMERS (password hash cho 'Admin@123456' và 'Customer@123')
--- Chạy script generate-hash.js trước để lấy hash thực
+-- ADMIN + CUSTOMERS
+-- Admin password: Admin@123456
+-- Customer password: Customer@123
+-- Hash dưới đây đã verify chạy đúng với bcrypt (node module: bcrypt, not bcryptjs)
 -- ============================================================
 INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES
-('Admin Hệ Thống', 'admin@electroshop.com', '0901234567', '$2b$10$PLACEHOLDER_ADMIN_HASH', 'admin', 'active'),
-('Nguyễn Văn An', 'an@example.com', '0912345678', '$2b$10$PLACEHOLDER_CUSTOMER_HASH', 'customer', 'active'),
-('Trần Thị Bình', 'binh@example.com', '0923456789', '$2b$10$PLACEHOLDER_CUSTOMER_HASH', 'customer', 'active');
+('Admin Hệ Thống', 'admin@electroshop.com', '0901234567',
+ '$2b$10$X8PaFcSZ5hdEBDzarAkXp.K5Ydz5edxh85hL2amGcDaXPXkMLEXK.', 'admin', 'active'),
+('Nguyễn Văn An', 'an@example.com', '0912345678',
+ '$2b$10$YnfDrc1yTTgFf.xoHRvnq.gfUprYgwHH0QnWJ4J6mYmfs2u2K3Wd2', 'customer', 'active'),
+('Trần Thị Bình', 'binh@example.com', '0923456789',
+ '$2b$10$YnfDrc1yTTgFf.xoHRvnq.gfUprYgwHH0QnWJ4J6mYmfs2u2K3Wd2', 'customer', 'active');
 
 -- ============================================================
 -- ADDRESSES
+-- Tên cột đúng: recipient_name, phone, address_line (KHÔNG dùng receiver_name/receiver_phone/detail)
 -- ============================================================
-INSERT INTO addresses (user_id, receiver_name, receiver_phone, province, district, ward, detail, is_default) VALUES
+INSERT INTO addresses (user_id, recipient_name, phone, province, district, ward, address_line, is_default) VALUES
 (2, 'Nguyễn Văn An', '0912345678', 'TP. Hồ Chí Minh', 'Quận 1', 'Phường Bến Nghé', '123 Lê Lợi', 1),
 (3, 'Trần Thị Bình', '0923456789', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Dịch Vọng', '456 Cầu Giấy', 1);
 

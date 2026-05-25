@@ -137,13 +137,13 @@ router.get('/profile/addresses', async (req, res) => {
 });
 
 router.post('/profile/addresses', async (req, res) => {
-  const { receiver_name, receiver_phone, province, district, ward, detail, is_default } = req.body;
+  const { recipient_name, phone, province, district, ward, address_line, is_default } = req.body;
   if (is_default) {
     await pool.query('UPDATE addresses SET is_default = 0 WHERE user_id = ?', [req.session.user.id]);
   }
   await pool.query(
-    'INSERT INTO addresses (user_id, receiver_name, receiver_phone, province, district, ward, detail, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [req.session.user.id, receiver_name, receiver_phone, province, district, ward, detail, is_default ? 1 : 0]
+    'INSERT INTO addresses (user_id, recipient_name, phone, province, district, ward, address_line, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [req.session.user.id, recipient_name, phone, province, district, ward, address_line, is_default ? 1 : 0]
   );
   req.flash('success', 'Đã thêm địa chỉ');
   res.redirect('/profile/addresses');
