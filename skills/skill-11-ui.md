@@ -212,20 +212,24 @@ POST /profile/change-password → xử lý đổi MK
 ## Checklist xác nhận ✅
 
 ```
-[ ] Trang chủ: 3 section sản phẩm hiển thị đúng
-[ ] Footer đầy đủ, responsive
-[ ] Breadcrumb đúng trên /products/:slug và /orders/:code
-[ ] Flash message tự ẩn sau 4 giây
-[ ] Submit button disabled khi đang xử lý
-[ ] Empty state trên: giỏ rỗng, không có đơn, không có kết quả tìm kiếm
-[ ] Mobile 375px: không overflow, tap target đủ lớn
-[ ] Product grid: 2 cột mobile, 3 tablet, 4 desktop
-[ ] Giá format đúng: 34.990.000đ
-[ ] Ngày format đúng: dd/mm/yyyy
-[ ] Rating stars hiển thị đúng màu
-[ ] Ảnh sản phẩm: fallback /images/no-image.png khi lỗi
-[ ] Lazy loading ảnh hoạt động
-[ ] Không có lỗi console trên bất kỳ trang nào
+[x] Trang chủ: 3 section sản phẩm hiển thị đúng
+[x] Footer đầy đủ, responsive
+[x] Breadcrumb đúng trên /products/:slug và /orders/:code
+[x] Flash message tự ẩn sau 4 giây
+[x] Submit button disabled khi đang xử lý
+[x] Empty state trên: giỏ rỗng, không có đơn, không có kết quả tìm kiếm
+[x] Mobile 375px: không overflow, tap target đủ lớn
+[x] Product grid: 2 cột mobile, 3 tablet, 4 desktop
+[x] Giá format đúng: 34.990.000đ
+[x] Ngày format đúng: dd/mm/yyyy
+[x] Rating stars hiển thị đúng màu
+[x] Ảnh sản phẩm: fallback /images/no-image.png khi lỗi
+[x] Lazy loading ảnh hoạt động
+[x] Không có lỗi console trên bất kỳ trang nào
+[x] Smooth transitions và hover effects (buttons, cards, links)
+[x] Fade-in animation cho product cards
+[x] Brand filter removed from products listing page
+[x] Images now stored in /img/products/ instead of /uploads/products/
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 11`

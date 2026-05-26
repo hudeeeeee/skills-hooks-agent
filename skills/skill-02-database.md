@@ -193,9 +193,12 @@ console.log('Products in DB:', rows[0].cnt);
 ```
 [x] schema.sql chạy không lỗi, 12 bảng được tạo
 [x] seed.sql chạy không lỗi
-[x] SELECT COUNT(*) FROM users → 3 rows
-[x] SELECT COUNT(*) FROM products → 10 rows
-[x] SELECT COUNT(*) FROM categories → 8 rows
+[x] SELECT COUNT(*) FROM users → 3 rows (admin + 2 customers)
+[x] SELECT COUNT(*) FROM products → 56 rows (real data from phamthanhhai DB)
+[x] SELECT COUNT(*) FROM categories → 10 rows (Điện tử gia dụng)
+[x] SELECT COUNT(*) FROM product_images → 280 rows (real images from GitHub)
+[x] Products have real HTML descriptions (max 1000 chars)
+[x] Image paths use /img/products/PX/ format
 [x] FK constraint hoạt động: thử INSERT cart_item với product_id không tồn tại → lỗi FK
 [x] UNIQUE constraint hoạt động: thử INSERT users với email trùng → lỗi UNIQUE
 [x] Pool kết nối từ Node.js: pool.query('SELECT 1') không throw
