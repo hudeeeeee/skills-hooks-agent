@@ -1,5 +1,18 @@
 # SKILL 00 — Install & Project Init
 
+## Thông tin đồ án
+
+**Sinh viên thực hiện:**
+- Email: dat1404040404@gmail.com
+- Số điện thoại: 0943722051 (Zalo)
+- Ngân hàng: 04179934401 - TP Bank
+
+**Trường:** Trường Đại học Mỏ - Địa chất  
+**Lớp:** dcctct67-04b  
+**Đề tài:** Website thương mại điện tử bán đồ điện tử
+
+---
+
 ## Mục tiêu
 Khởi tạo thư mục project, cài toàn bộ dependencies, tạo cấu trúc thư mục trống, cấu hình .gitignore.
 
