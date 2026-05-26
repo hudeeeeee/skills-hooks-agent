@@ -2,7 +2,8 @@
 
 ## Thông tin đồ án
 
-**Sinh viên thực hiện:**
+**Sinh viên thực hiện:** Huy Đạt
+- Facebook: https://www.facebook.com/hudeeeeeee
 - Email: dat1404040404@gmail.com
 - Số điện thoại: 0943722051 (Zalo)
 - Ngân hàng: 04179934401 - TP Bank
@@ -10,6 +11,12 @@
 **Trường:** Trường Đại học Mỏ - Địa chất  
 **Lớp:** dcctct67-04b  
 **Đề tài:** Website thương mại điện tử bán đồ điện tử
+
+**Note:** Thông tin liên hệ hiển thị trong footer website với:
+- Icons màu vàng (text-warning)
+- Text màu trắng (text-light) trên nền tối
+- Facebook link đầu tiên, sau đó phone, email, bank, school, class
+- QR code 150px dưới contact info
 
 ---
 
