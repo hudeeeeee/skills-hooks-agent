@@ -233,3 +233,28 @@ POST /profile/change-password → xử lý đổi MK
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 11`
+
+---
+
+## Test Cases — UI/UX & Responsive
+
+| ID | Tên test | Input | Expected | Loại |
+|----|----------|-------|----------|------|
+| TC81 | Trang chủ hiển thị desktop | Chrome 1920×1080 | Layout đúng, không overflow, nav hiển thị đủ | UI |
+| TC82 | Trang chủ responsive mobile | Chrome DevTools 375×812 (iPhone) | Hamburger menu, ảnh co dãn, không scroll ngang | UI |
+| TC83 | Trang chủ responsive tablet | 768×1024 | Grid 2 cột, layout không vỡ | UI |
+| TC84 | Empty state giỏ hàng | Giỏ hàng rỗng | Hiển thị icon + "Giỏ hàng trống" + nút mua sắm | UI |
+| TC85 | Empty state kết quả tìm kiếm | Tìm từ không có kết quả | "Không tìm thấy sản phẩm" + gợi ý từ khóa khác | UI |
+| TC86 | Loading state | Mạng chậm, fetch dữ liệu | Skeleton/spinner hiển thị, không blank trắng | UI |
+| TC87 | Thông báo thành công | Thêm vào giỏ hàng | Toast/alert "Đã thêm vào giỏ hàng" tự biến mất sau 3s | UI |
+| TC88 | Thông báo lỗi | Đặt hàng thất bại | Alert đỏ hiển thị message lỗi rõ ràng | UI |
+| TC89 | Phân trang sản phẩm | 50+ sản phẩm | Pagination đúng, trang active highlight | UI |
+| TC90 | Breadcrumb navigation | Vào trang chi tiết SP | Breadcrumb đúng: Home > Category > Product | UI |
+| TC91 | Hình ảnh broken | src ảnh không tồn tại | Fallback image hoặc icon placeholder | UI |
+| TC92 | Form validation real-time | Nhập email sai format | Border đỏ + hint ngay khi blur, không cần submit | UI |
+| TC93 | Dark mode (nếu có) | Toggle dark mode | Tất cả màu sắc chuyển đúng, text readable | UI |
+| TC94 | Accessibility — alt text | Inspect ảnh sản phẩm | Tất cả <img> có alt attribute | Accessibility |
+| TC95 | Page title mỗi trang | Xem trang khác nhau | <title> thay đổi đúng theo trang | UI |
+| UI01 | Font chữ nhất quán | Inspect toàn site | Chỉ dùng 1-2 font family, không font random | UI |
+| UI02 | Color scheme nhất quán | Inspect button/link | Primary color đồng nhất, không màu lạ | UI |
+

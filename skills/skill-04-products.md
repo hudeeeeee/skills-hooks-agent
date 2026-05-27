@@ -177,17 +177,17 @@ const getHome = async (req, res) => {
 };
 
 // GET /products
+// NOTE: brand filter đã bị XÓA khỏi UI (commit e72ee22 – broken filter removed)
 const getProducts = async (req, res) => {
-  const { keyword, category, brand, minPrice, maxPrice, onSale, inStock, sort, page } = req.query;
+  const { keyword, category, minPrice, maxPrice, onSale, inStock, sort, page } = req.query;
   const { products, pagination } = await productService.getProducts({
-    keyword, category, brand, minPrice, maxPrice, onSale, inStock, sort, page: parseInt(page) || 1
+    keyword, category, minPrice, maxPrice, onSale, inStock, sort, page: parseInt(page) || 1
   });
   const categories = await productService.getAllCategories();
-  const brands = await productService.getAllBrands();
 
   res.render('pages/products/index', {
     title: keyword ? `Kết quả: "${keyword}"` : 'Tất cả sản phẩm',
-    products, pagination, categories, brands, filters: req.query
+    products, pagination, categories, filters: req.query
   });
 };
 
@@ -340,17 +340,7 @@ module.exports = router;
                                   placeholder="Đến" value="<%= filters.maxPrice || '' %>"></div>
         </div>
 
-        <hr>
-        <h6 class="fw-bold">Thương hiệu</h6>
-        <% brands.forEach(brand => { %>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="brand"
-                   value="<%= brand %>" <%= filters.brand === brand ? 'checked' : '' %>
-                   onchange="document.getElementById('filter-form').submit()">
-            <label class="form-check-label"><%= brand %></label>
-          </div>
-        <% }); %>
-
+        <!-- Brand filter đã bị xóa (commit e72ee22) -->
         <hr>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="onSale" value="1"
@@ -442,7 +432,7 @@ module.exports = router;
 ```
 [x] GET / → trang chủ hiển thị sản phẩm sale, mới nhất, rating cao
 [x] GET /products → danh sách 12 sản phẩm/trang
-[x] GET /products?keyword=iphone → lọc đúng theo tên/brand
+[x] GET /products?keyword=iphone → lọc đúng theo tên sản phẩm
 [x] GET /products?category=dien-thoai-phu-kien → lọc đúng danh mục
 [ ] GET /products?minPrice=5000000&maxPrice=20000000 → lọc đúng khoảng giá
 [x] GET /products?onSale=1 → chỉ hiện SP giảm giá
@@ -458,3 +448,20 @@ module.exports = router;
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 04`
+
+---
+
+## Test Cases — Product Catalog
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC11 | GET /products | 12 sản phẩm/trang, pagination đúng |
+| TC12 | GET /products?keyword=iphone | Hiển thị iPhone 15 Pro Max |
+| TC13 | GET /products?keyword=abcxyz123 | Empty state + thông báo "không tìm thấy" |
+| TC14 | GET /products?category=dien-thoai | Chỉ hiển thị sản phẩm thuộc danh mục (brand filter đã xóa) |
+| TC15 | GET /products?minPrice=20000000&maxPrice=35000000 | Sản phẩm trong khoảng giá |
+| TC16 | GET /products/apple-iphone-15-pro-max-256gb | Gallery ảnh, thông số, đánh giá hiển thị |
+| TC17 | Sản phẩm status=inactive trong DB | Không xuất hiện ở /products (public) |
+| TC18 | Sản phẩm stock_quantity=0 | Badge "Hết hàng", nút "Thêm vào giỏ" bị disable |
+| TC19 | Sản phẩm có sale_price | Hiển thị giá khuyến mãi + badge "Giảm X%" |
+| SEC02 | keyword = `' UNION SELECT * FROM users --` | Không lộ dữ liệu, không lỗi SQL |

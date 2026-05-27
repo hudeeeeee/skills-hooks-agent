@@ -370,3 +370,22 @@ app.use((req, res, next) => {
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 06`
+
+---
+
+## Test Cases — Orders
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC31 | POST /orders: giỏ hợp lệ, COD | Order tạo, cart xóa, payment_status=unpaid |
+| TC32 | POST /orders: giỏ hợp lệ, bank_transfer | Redirect /payment/bank-info/ORD-xxx |
+| TC33 | POST /orders: giỏ rỗng | Redirect /cart, không tạo đơn |
+| TC34 | POST /orders: stock=0 tại thời điểm checkout | Flash lỗi tồn kho, không tạo đơn, rollback |
+| TC35 | GET /orders | Chỉ thấy đơn hàng của chính mình |
+| TC36 | GET /orders/ORD-xxx của user khác | 404 hoặc không có kết quả |
+| TC37 | POST /orders/ORD-xxx/cancel: status=pending | Hủy thành công |
+| TC38 | POST /orders/ORD-xxx/cancel: status=confirmed | Hủy thành công + hoàn kho |
+| TC39 | POST /orders/ORD-xxx/cancel: status=completed | Flash "Không thể hủy đơn hàng này" |
+| DATA01 | Tạo đơn thành công | orders + order_items + payments tạo cùng transaction |
+| DATA02 | Simulate lỗi DB giữa chừng | Rollback toàn bộ, không có record nào được tạo |
+| DATA03 | Hủy đơn đã confirmed | stock_quantity hoàn về đúng số lượng |

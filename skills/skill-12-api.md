@@ -265,3 +265,29 @@ PRODUCTION READY:
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 12`
+
+---
+
+## Test Cases — API Routes & Final Wiring
+
+| ID | Tên test | Input | Expected | Loại |
+|----|----------|-------|----------|------|
+| TC96 | GET /api/products | Request không cần auth | 200, JSON array sản phẩm | Functional |
+| TC97 | GET /api/products?category=laptop | Filter đúng category | 200, chỉ trả laptop | Functional |
+| TC98 | GET /api/products/:id hợp lệ | id tồn tại | 200, JSON chi tiết sản phẩm | Functional |
+| TC99 | GET /api/products/:id không tồn tại | id=99999 | 404, message rõ ràng | Negative |
+| TC100 | POST /api/cart — chưa đăng nhập | Gửi không có session | 401 Unauthorized | Security |
+| TC101 | POST /api/cart — đã đăng nhập | body: {product_id, quantity} hợp lệ | 200, cart cập nhật | Functional |
+| TC102 | PUT /api/orders/:id/cancel — đúng owner | user_id khớp order | 200, trạng thái = cancelled | Functional |
+| TC103 | PUT /api/orders/:id/cancel — sai owner | user_id khác | 403 Forbidden | Security |
+| TC104 | Rate limiting | 100+ request/phút từ 1 IP | 429 Too Many Requests | Security |
+| TC105 | Content-Type header | POST JSON không có header | 400 hoặc xử lý graceful | Functional |
+| TC106 | Response format nhất quán | Tất cả API endpoint | JSON có `success`, `data`/`error` field | Functional |
+| TC107 | 404 route không tồn tại | GET /api/nonexistent | 404 JSON, không crash server | Negative |
+| TC108 | Server error handling | DB down, query fail | 500 JSON, không lộ stack trace | Security |
+| TC109 | CORS header | Request từ origin khác | Đúng CORS policy, không wildcard trên prod | Security |
+| TC110 | Auth middleware chain | Route cần auth + admin | Middleware kiểm tra đúng thứ tự | Functional |
+| API01 | Path traversal | GET /api/../etc/passwd | 400/404, không đọc file system | Security |
+| API02 | Oversized payload | POST body > 10MB | 413 Payload Too Large | Security |
+| API03 | Missing required field | POST order không có address | 400, chỉ rõ field thiếu | Negative |
+

@@ -363,18 +363,23 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('change', () => updateCartItem(input.dataset.id, input.value));
   });
 
-  document.querySelectorAll('.remove-item').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('Xóa sản phẩm này khỏi giỏ hàng?')) return;
-      const res = await fetch(`/cart/items/${btn.dataset.id}`, { method: 'DELETE' });
+  // Event delegation cho remove-item (tránh lỗi khi element chưa tồn tại)
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.remove-item');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    try {
+      const res = await fetch(`/cart/items/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        document.getElementById(`cart-item-${btn.dataset.id}`)?.remove();
-        updateCartTotals(data);
-        updateCartBadge(data.cartCount);
-        if (data.cartCount === 0) location.reload();
+        updateCartCount();
+        location.reload();
+      } else {
+        showToast(data.message || 'Có lỗi xảy ra', 'danger');
       }
-    });
+    } catch(e) {
+      showToast('Có lỗi xảy ra', 'danger');
+    }
   });
 
   async function updateCartItem(id, qty) {
@@ -437,3 +442,21 @@ document.addEventListener('DOMContentLoaded', () => {
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 05`
+
+---
+
+## Test Cases — Cart
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC20 | POST /cart/add: product_id mới, qty=2 | Thêm vào giỏ, cartCount+2, JSON {success:true} |
+| TC21 | POST /cart/add: cùng product_id đã có | Cộng dồn quantity, không tạo record mới |
+| TC22 | POST /cart/add: qty > stock_quantity | Flash/JSON lỗi "Vượt quá tồn kho" |
+| TC23 | POST /cart/add: sản phẩm status=inactive | Báo lỗi, không thêm |
+| TC24 | PATCH /cart/items/:id: qty=3 | itemTotal và cartTotal cập nhật đúng (AJAX) |
+| TC25 | DELETE /cart/items/:id | Item xóa, total cập nhật |
+| TC26 | Xóa hết items | Empty state + link /products |
+| TC27 | User A DELETE item của User B | 403 Forbidden |
+| TC28 | subtotal >= 2.000.000đ | shipping_fee = 0 |
+| TC29 | subtotal < 2.000.000đ | shipping_fee = 50.000đ |
+| TC30 | Giá trong giỏ | Dùng sale_price nếu có, ngược lại dùng price |

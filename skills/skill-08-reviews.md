@@ -8,8 +8,7 @@ Customer đánh giá sản phẩm sau khi đơn completed. Cập nhật avg_rati
 src/controllers/review.controller.js
 src/services/review.service.js
 src/routes/review.routes.js
-src/views/pages/products/partials/review-form.ejs
-src/views/pages/products/partials/review-list.ejs
+src/views/pages/reviews/create.ejs
 ```
 
 ---
@@ -128,24 +127,120 @@ module.exports = { canReview, createReview, getProductReviews, setReviewStatus }
 
 ```javascript
 const reviewService = require('../services/review.service');
+const pool = require('../config/database');
 
-// POST /reviews
-const createReview = async (req, res) => {
-  const { product_id, order_id, rating, comment, redirect_to } = req.body;
-  const result = await reviewService.createReview(req.session.user.id, { product_id, order_id, rating, comment });
+// GET /reviews/create?product_id=&order_id=
+const getCreateReview = async (req, res) => {
+  const { product_id, order_id } = req.query;
+  const [products] = await pool.query('SELECT name, slug FROM products WHERE id = ?', [product_id]);
+  if (!products.length) return res.status(404).render('errors/404', { title: 'Sản phẩm không tìm thấy' });
 
-  if (!result.success) req.flash('error', result.error);
-  else req.flash('success', 'Cảm ơn bạn đã đánh giá sản phẩm!');
+  const check = await reviewService.canReview(req.session.user.id, product_id, order_id);
+  if (!check.allowed) {
+    req.flash('error', check.reason);
+    return res.redirect('back');
+  }
 
-  res.redirect(redirect_to || `/orders/${req.body.order_code}`);
+  res.render('pages/reviews/create', {
+    title: 'Đánh giá sản phẩm',
+    product: products[0],
+    product_id,
+    order_id
+  });
 };
 
-module.exports = { createReview };
+// POST /reviews
+const postCreateReview = async (req, res) => {
+  const result = await reviewService.createReview(req.session.user.id, req.body);
+  if (!result.success) {
+    req.flash('error', result.error);
+    return res.redirect('back');
+  }
+  req.flash('success', 'Cảm ơn bạn đã đánh giá sản phẩm!');
+  // Query order_code từ order_id (không dùng hidden field)
+  const [orderRows] = await pool.query('SELECT order_code FROM orders WHERE id = ?', [req.body.order_id]);
+  const redirectTo = orderRows.length ? `/orders/${orderRows[0].order_code}` : '/orders';
+  res.redirect(redirectTo);
+};
+
+module.exports = { getCreateReview, postCreateReview };
 ```
 
 ---
 
-## Bước 3 — Tích hợp form đánh giá vào trang chi tiết đơn hàng
+## Bước 3 — review.routes.js
+
+```javascript
+const express = require('express');
+const router = express.Router();
+const ctrl = require('../controllers/review.controller');
+const { requireAuth } = require('../middlewares/auth.middleware');
+
+router.get('/reviews/create', requireAuth, ctrl.getCreateReview);
+router.post('/reviews', requireAuth, ctrl.postCreateReview);
+
+module.exports = router;
+```
+
+---
+
+## Bước 4 — reviews/create.ejs (trang đánh giá riêng)
+
+```html
+<%- include('../../partials/top') %>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-1">Đánh giá sản phẩm</h5>
+        <p class="text-muted mb-4">
+          <a href="/products/<%= product.slug %>"><%= product.name %></a>
+        </p>
+        <form action="/reviews" method="POST">
+          <input type="hidden" name="product_id" value="<%= product_id %>">
+          <input type="hidden" name="order_id" value="<%= order_id %>">
+          <div class="mb-3">
+            <label class="form-label fw-medium">Số sao <span class="text-danger">*</span></label>
+            <div class="d-flex gap-2 mb-2" id="star-rating">
+              <% for(let i=1; i<=5; i++) { %>
+                <button type="button" class="btn btn-outline-warning star-btn" data-value="<%= i %>">
+                  <i class="bi bi-star"></i> <%= i %>
+                </button>
+              <% } %>
+            </div>
+            <input type="hidden" name="rating" id="rating-input" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Nhận xét</label>
+            <textarea name="comment" class="form-control" rows="4"
+                      placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-warning w-100">Gửi đánh giá</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = parseInt(btn.dataset.value);
+    document.getElementById('rating-input').value = val;
+    document.querySelectorAll('.star-btn').forEach((b, i) => {
+      b.classList.toggle('btn-warning', i < val);
+      b.classList.toggle('btn-outline-warning', i >= val);
+    });
+  });
+});
+</script>
+<%- include('../../partials/bot') %>
+```
+
+---
+
+## Bước 5 — Nút "Đánh giá" trong orders/detail.ejs
+
+> **UX thực tế:** Không dùng modal inline. Nút "Đánh giá" là link đến trang riêng `/reviews/create?product_id=&order_id=`.
 
 Trong `src/views/pages/orders/detail.ejs`, với mỗi order_item:
 
@@ -160,52 +255,13 @@ Trong `src/views/pages/orders/detail.ejs`, với mỗi order_item:
     </div>
     <div>
       <% if (order.order_status === 'completed') { %>
-        <% if (order.reviewedProductIds.includes(item.product_id)) { %>
+        <% if (order.reviewedProductIds && order.reviewedProductIds.includes(item.product_id)) { %>
           <span class="badge bg-success"><i class="bi bi-check-circle"></i> Đã đánh giá</span>
         <% } else { %>
-          <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewModal-<%= item.product_id %>">
+          <a href="/reviews/create?product_id=<%= item.product_id %>&order_id=<%= order.id %>"
+             class="btn btn-outline-warning btn-sm">
             <i class="bi bi-star"></i> Đánh giá
-          </button>
-          <!-- Modal đánh giá -->
-          <div class="modal fade" id="reviewModal-<%= item.product_id %>" tabindex="-1">
-            <div class="modal-dialog">
-              <form action="/reviews" method="POST" class="modal-content">
-                <div class="modal-header">
-                  <h6 class="modal-title">Đánh giá: <%= item.product_name %></h6>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                  <input type="hidden" name="product_id" value="<%= item.product_id %>">
-                  <input type="hidden" name="order_id" value="<%= order.id %>">
-                  <input type="hidden" name="order_code" value="<%= order.order_code %>">
-                  <input type="hidden" name="redirect_to" value="/orders/<%= order.order_code %>">
-                  <div class="mb-3">
-                    <label class="form-label fw-bold">Đánh giá của bạn <span class="text-danger">*</span></label>
-                    <div class="star-rating d-flex gap-2 fs-3">
-                      <% for(let i=1; i<=5; i++) { %>
-                        <input type="radio" name="rating" value="<%= i %>"
-                               id="star-<%= item.product_id %>-<%= i %>"
-                               class="d-none" required>
-                        <label for="star-<%= item.product_id %>-<%= i %>"
-                               class="text-muted cursor-pointer star-label"
-                               style="cursor:pointer">☆</label>
-                      <% } %>
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Nhận xét (tuỳ chọn)</label>
-                    <textarea name="comment" class="form-control" rows="3"
-                              placeholder="Chia sẻ trải nghiệm của bạn..." maxlength="1000"></textarea>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                  <button type="submit" class="btn btn-warning">Gửi đánh giá</button>
-                </div>
-              </form>
-            </div>
-          </div>
+          </a>
         <% } %>
       <% } %>
     </div>
@@ -259,10 +315,38 @@ document.querySelectorAll('.star-rating').forEach(container => {
 [x] Sau khi tạo review: products.avg_rating cập nhật đúng
 [x] Sau khi tạo review: products.review_count tăng đúng
 [x] Review hiển thị trên trang chi tiết sản phẩm (visible only)
-[x] Button "Đánh giá" chỉ xuất hiện khi order_status = completed
-[x] Button "Đã đánh giá" sau khi review xong
-[ ] Star rating UI hoạt động (hover, click)
+[x] GET /reviews/create?product_id=&order_id= → render form đúng
+[x] GET /reviews/create với order chưa completed → flash error, redirect back
+[x] Link "Đánh giá" chỉ xuất hiện khi order_status = completed
+[x] Link "Đã đánh giá" (badge) sau khi review xong
+[x] Star rating button UI (click highlight) hoạt động
+[x] POST /reviews khi order pending → flash error "chưa hoàn thành"
+[x] POST /reviews khi order completed đúng product → tạo review, redirect /orders/:code
+[x] POST /reviews lần 2 cùng product+order → flash error "đã đánh giá"
+[x] POST /reviews product không thuộc order → flash error
+[x] rating = 0 hoặc > 5 → flash error validate
+[x] Sau khi tạo review: products.avg_rating cập nhật đúng
+[x] Sau khi tạo review: products.review_count tăng đúng
+[x] Review hiển thị trên trang chi tiết sản phẩm (visible only)
 [ ] Admin ẩn review → avg_rating được recalculate
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 08`
+
+---
+
+## Test Cases — Reviews
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC50 | GET /reviews/create?product_id=X&order_id=Y (completed) | Render form đúng, hiển thị tên SP |
+| TC51 | GET /reviews/create: đơn status=shipping | Flash error, redirect back |
+| TC52 | POST /reviews: đơn completed, rating=5 | Review lưu, redirect /orders/:code, avg_rating cập nhật |
+| TC53 | POST /reviews: đơn status=shipping | Flash "chưa hoàn thành", không lưu |
+| TC54 | POST /reviews: review đã tồn tại (user+product+order) | Flash "Đã đánh giá sản phẩm này" |
+| TC55 | POST /reviews: rating=6 | Validation lỗi, không lưu |
+| TC56 | POST /reviews: rating=0 | Validation lỗi |
+| TC57 | POST /reviews: product không nằm trong order | Flash error |
+| TC56 | POST /reviews: order của user khác | 403 |
+| TC57 | Admin PATCH /admin/reviews/:id/status=hidden | Review ẩn, không tính vào avg_rating |
+| TC58 | avg_rating sau khi ẩn review | Tính lại chỉ từ review status=visible |

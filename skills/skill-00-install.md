@@ -224,7 +224,7 @@ mkdir -p src/views/admin/categories
 mkdir -p public/css
 mkdir -p public/js
 mkdir -p public/images
-mkdir -p public/uploads
+mkdir -p public/img
 
 # Database scripts
 mkdir -p database
@@ -237,7 +237,7 @@ mkdir -p src/{config,controllers/admin,middlewares,models,routes,services,utils}
   src/views/{layouts,partials,auth,errors} \
   src/views/pages/{products,orders,profile,payment,warranty} \
   src/views/admin/{products,orders,users,reviews,warranty,categories} \
-  public/{css,js,images,uploads} \
+  public/{css,js,images,img} \
   database
 ```
 
@@ -256,8 +256,8 @@ node_modules/
 .env.production
 
 # Uploads (giữ thư mục, ignore nội dung)
-public/uploads/*
-!public/uploads/.gitkeep
+public/img/*
+!public/img/.gitkeep
 
 # Logs
 *.log
@@ -278,8 +278,8 @@ EOF
 ## Bước 7 — Tạo placeholder files
 
 ```bash
-# Giữ thư mục uploads trong git
-touch public/uploads/.gitkeep
+# Giữ thư mục img trong git
+touch public/img/.gitkeep
 
 # Placeholder ảnh
 touch public/images/no-image.png
@@ -307,7 +307,7 @@ DB_NAME=electronics_shop
 SESSION_SECRET=change-this-to-random-32-char-string
 
 # Upload
-UPLOAD_DIR=public/uploads
+UPLOAD_DIR=public/img
 MAX_FILE_SIZE=5242880
 
 # Payment - Bank Transfer
@@ -406,6 +406,301 @@ node server.js
 
 ---
 
+## Bước 12 — Docker Deployment (Optional)
+
+### 12.1 Tạo Dockerfile
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY . .
+RUN mkdir -p public/img
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### 12.2 docker-compose.yml (Dev — build local)
+
+```yaml
+services:
+  db:
+    image: mysql:8.0
+    container_name: electroshop_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: electronics_shop
+      MYSQL_USER: admin123
+      MYSQL_PASSWORD: admin123
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin123", "-padmin123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: electroshop_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: admin123
+      DB_PASS: admin123
+      DB_NAME: electronics_shop
+      SESSION_SECRET: electroshop-secret-key-2024-datn-hude
+      UPLOAD_DIR: public/img
+      MAX_FILE_SIZE: 5242880
+      BANK_ACCOUNT_NUMBER: "0417934401"
+      BANK_ACCOUNT_NAME: DO HUY DAT
+      BANK_NAME: MB Bank
+    ports:
+      - "3000:3000"
+    volumes:
+      - img_data:/app/public/img
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: electroshop_ngrok
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    command:
+      - "http"
+      - "app:3000"
+    ports:
+      - "4040:4040"
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+  img_data:
+```
+
+### 12.3 docker-compose.prod.yml (Prod — pull pre-built image)
+
+```yaml
+services:
+  db:
+    image: mysql:8.0
+    container_name: electroshop_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: electronics_shop
+      MYSQL_USER: admin123
+      MYSQL_PASSWORD: admin123
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin123", "-padmin123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: haiptjits/electroshop:latest
+    container_name: electroshop_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: admin123
+      DB_PASS: admin123
+      DB_NAME: electronics_shop
+      SESSION_SECRET: electroshop-secret-key-2024-datn-hude
+      UPLOAD_DIR: public/img
+      MAX_FILE_SIZE: 5242880
+      BANK_ACCOUNT_NUMBER: "0417934401"
+      BANK_ACCOUNT_NAME: DO HUY DAT
+      BANK_NAME: MB Bank
+      VNPAY_TMN_CODE: ${VNPAY_TMN_CODE:-DEMO1234}
+      VNPAY_HASH_SECRET: ${VNPAY_HASH_SECRET:-DEMOSECRET1234567890ABCDEF123456}
+      VNPAY_URL: ${VNPAY_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+      VNPAY_RETURN_URL: ${VNPAY_RETURN_URL:-http://localhost:3000/payment/vnpay/return}
+      VNPAY_IPN_URL: ${VNPAY_IPN_URL:-http://localhost:3000/payment/vnpay/ipn}
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - img_data:/app/public/img
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: electroshop_ngrok
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    command:
+      - "http"
+      - "app:3000"
+    ports:
+      - "4040:4040"
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+  img_data:
+```
+
+### 12.4 docker-compose.pull.yml (One-command deploy — pre-seeded DB image)
+
+```yaml
+services:
+  db:
+    image: haiptjits/electroshop-db:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: electronics_shop
+      MYSQL_USER: admin123
+      MYSQL_PASSWORD: admin123
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "admin123", "-padmin123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: haiptjits/electroshop:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: admin123
+      DB_PASS: admin123
+      DB_NAME: electronics_shop
+      SESSION_SECRET: electroshop-secret-key-2024-datn-hude
+      UPLOAD_DIR: public/img
+      MAX_FILE_SIZE: 5242880
+      BANK_ACCOUNT_NUMBER: "0417934401"
+      BANK_ACCOUNT_NAME: DO HUY DAT
+      BANK_NAME: MB Bank
+      VNPAY_TMN_CODE: DEMO1234
+      VNPAY_HASH_SECRET: DEMOSECRET1234567890ABCDEF123456
+      VNPAY_URL: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      VNPAY_RETURN_URL: http://localhost:3000/payment/vnpay/return
+      VNPAY_IPN_URL: http://localhost:3000/payment/vnpay/ipn
+    ports:
+      - "3000:3000"
+    volumes:
+      - img_data:/app/public/img
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: electroshop_ngrok
+    restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    command:
+      - "http"
+      - "app:3000"
+    ports:
+      - "4040:4040"
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+  img_data:
+```
+
+### 12.5 setup.sh (One-command deploy từ bất kỳ máy nào)
+
+```bash
+#!/bin/bash
+# Tải docker-compose.pull.yml (dùng ảnh pre-seeded DB)
+curl -fsSL https://raw.githubusercontent.com/hudeeeeee/website/main/docker-compose.pull.yml -o docker-compose.yml
+
+export NGROK_AUTHTOKEN=<YOUR_NGROK_TOKEN>
+
+docker compose pull
+docker compose up -d
+
+echo "Waiting for ngrok..."
+for i in $(seq 1 20); do
+  URL=$(curl -s http://localhost:4040/api/tunnels 2>/dev/null | \
+    python3 -c "import sys,json; data=json.load(sys.stdin); \
+    print(next((t['public_url'] for t in data.get('tunnels',[]) \
+    if t['public_url'].startswith('https')), ''))" 2>/dev/null)
+  if [ -n "$URL" ]; then
+    echo ""
+    echo "================================"
+    echo "Ngrok URL: $URL"
+    echo "================================"
+    break
+  fi
+  sleep 1
+done
+
+if [ -z "$URL" ]; then
+  echo "Ngrok not ready — check http://localhost:4040"
+fi
+```
+
+### 12.6 Docker Commands
+
+**Dev (build local):**
+```bash
+docker compose up -d --build
+```
+
+**Prod (pull pre-built):**
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+**One-command deploy (máy mới, không cần source):**
+```bash
+bash setup.sh
+```
+
+**Push images lên Docker Hub:**
+```bash
+docker build -t haiptjits/electroshop:latest .
+docker push haiptjits/electroshop:latest
+```
+
+**Docker Hub images:**
+- `haiptjits/electroshop:latest` — app image
+- `haiptjits/electroshop-db:latest` — MySQL pre-seeded với schema + seed data
+
+---
+
 ## Checklist xác nhận ✅
 
 ```
@@ -417,12 +712,14 @@ node server.js
 [x] .env tồn tại và đã điền DB_PASS
 [x] SESSION_SECRET đã đổi khỏi default
 [x] .gitignore tồn tại, có node_modules và .env
-[x] public/uploads/.gitkeep tồn tại
+[x] public/img/.gitkeep tồn tại
 [x] Database electronics_shop tồn tại trong MySQL
 [x] node verify-script (Bước 3c) → 9 packages ✅ + 3 built-in ✅
 [x] MySQL connection test (Bước 10) → ✅ connected
 [x] node server.js → "Server: http://localhost:3000"
 [x] curl http://localhost:3000 hoặc browser → "ElectroShop — OK"
+[x] Docker: docker compose up -d → 3 containers healthy
+[x] Docker: curl localhost:4040/api/tunnels → ngrok URL (nếu có NGROK_AUTHTOKEN)
 ```
 
 ## Sau khi xong: chạy Skill 01

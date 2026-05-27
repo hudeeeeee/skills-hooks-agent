@@ -317,3 +317,22 @@ Trong `src/views/partials/navbar.ejs`:
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 03`
+
+---
+
+## Test Cases — Authentication
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC01 | Đăng ký: email mới, pass 8+ ký tự, confirm khớp | Tài khoản tạo, redirect /login với flash success |
+| TC02 | Đăng ký: email đã tồn tại trong DB | Flash "Email đã được sử dụng", không tạo |
+| TC03 | Đăng ký: password < 8 ký tự | Flash lỗi, không tạo tài khoản |
+| TC04 | Đăng ký: confirm ≠ password | Flash "Mật khẩu không khớp" |
+| TC05 | Đăng nhập: email + pass đúng, role=customer | Session tạo, redirect / |
+| TC06 | Đăng nhập: password sai | Flash "Sai email hoặc mật khẩu", không vào |
+| TC07 | Đăng nhập: user.status=blocked | Flash "Tài khoản bị khóa" |
+| TC08 | Đăng nhập: role=admin | Redirect /admin/dashboard |
+| TC09 | Đăng xuất | Session hủy, redirect /login |
+| TC10 | GET /cart không có session | Redirect /login?returnUrl=/cart |
+| TC11 | Kiểm tra DB sau đăng ký | password_hash là bcrypt hash, không phải plain text |
+| SEC01 | SQL Injection: email = `' OR '1'='1' --` | Không đăng nhập được, không lỗi SQL |

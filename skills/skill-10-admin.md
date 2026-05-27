@@ -477,3 +477,27 @@ module.exports = router;
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 10`
+
+---
+
+## Test Cases — Admin Dashboard & Management
+
+| ID | Tên test | Input | Expected | Loại |
+|----|----------|-------|----------|------|
+| TC67 | Admin login thành công | email admin + đúng password | Redirect /admin/dashboard, session role='admin' | Functional |
+| TC68 | Non-admin truy cập /admin | User thường GET /admin/products | 403 Forbidden hoặc redirect /login | Security |
+| TC69 | Xem danh sách sản phẩm admin | GET /admin/products | Hiển thị tất cả sản phẩm, phân trang | Functional |
+| TC70 | Thêm sản phẩm mới | POST form hợp lệ + ảnh | 201, sản phẩm xuất hiện trong DB và danh sách | Functional |
+| TC71 | Thêm sản phẩm thiếu trường bắt buộc | POST không có name/price | 400, báo lỗi validation | Negative |
+| TC72 | Sửa sản phẩm | PUT /admin/products/:id, data hợp lệ | 200, DB cập nhật, list hiển thị đúng | Functional |
+| TC73 | Xóa sản phẩm không có trong đơn hàng | DELETE /admin/products/:id | 200, removed from DB | Functional |
+| TC74 | Xóa sản phẩm đang trong đơn hàng active | DELETE /admin/products/:id | 400/409, giữ nguyên sản phẩm | Negative |
+| TC75 | Cập nhật trạng thái đơn hàng | PUT /admin/orders/:id/status, status='shipping' | Order status cập nhật, không vi phạm state machine | Functional |
+| TC76 | Transition trạng thái không hợp lệ | PUT status='pending' khi đang 'delivered' | 400, từ chối cập nhật | Negative |
+| TC77 | Xem thống kê doanh thu | GET /admin/dashboard | Hiển thị tổng doanh thu, số đơn, top sản phẩm | Functional |
+| TC78 | Upload ảnh sản phẩm | POST multipart/form-data, file .jpg < 5MB | Lưu file, path ghi vào DB | Functional |
+| TC79 | Upload file không phải ảnh | POST file .exe | 400, từ chối upload | Security |
+| TC80 | Admin xem tất cả đơn hàng | GET /admin/orders | Hiển thị đơn của tất cả users | Functional |
+| ADM01 | SQL injection qua admin search | name='; DROP TABLE products;-- | Prepared statement chặn, DB an toàn | Security |
+| ADM02 | CSRF trên admin action | POST từ domain khác | CSRF token invalid, từ chối | Security |
+

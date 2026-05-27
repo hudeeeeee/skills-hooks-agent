@@ -1265,11 +1265,18 @@ BƯỚC 4 — Nếu quá hạn không thanh toán
 BƯỚC 1 — Tạo payment URL
   POST /payment/vnpay/create
   → PaymentService tạo VNPAY URL với:
-     vnp_Amount = total_amount * 100
+     vnp_Amount = Math.floor(total_amount) * 100
      vnp_TxnRef = order_code
-     vnp_ReturnUrl = /payment/vnpay/return
-     vnp_IpnUrl = /payment/vnpay/ipn
-     vnp_SecureHash = HMAC-SHA512 của query string
+     vnp_OrderType = 'billpayment'  (KHÔNG dùng 'other')
+     vnp_ReturnUrl = ngrok URL hoặc /payment/vnpay/return
+     vnp_IpAddr = fallback 113.160.92.202 nếu localhost
+     vnp_CreateDate = GMT+7 timezone
+     vnp_SecureHash = HMAC-SHA512 với encoding đặc biệt
+
+  ENCODING RULES (CRITICAL):
+     - Manual URL encode: %20 → + (KHÔNG dùng querystring.stringify)
+     - Sort keys alphabetically trước khi build query
+     - signData và urlParams build riêng, encoding giống nhau
 
   → redirect sang VNPAY URL
 
@@ -1277,7 +1284,7 @@ BƯỚC 2 — User thanh toán trên VNPAY
 
 BƯỚC 3 — VNPAY callback về ReturnUrl
   GET /payment/vnpay/return?vnp_ResponseCode=00&vnp_TxnRef=ORD-...&...
-  → Verify SecureHash
+  → Verify SecureHash (dùng cùng encoding rules)
   → Nếu vnp_ResponseCode = '00': thanh toán thành công
   → Cập nhật payment_status = 'paid', order_status = 'confirmed'
   → redirect /orders/{order_code}?success=1
@@ -1292,17 +1299,73 @@ QUAN TRỌNG:
   - KHÔNG cập nhật DB chỉ dựa vào ReturnUrl (dễ giả mạo)
   - PHẢI verify SecureHash trước mọi thao tác cập nhật
   - Idempotent: nếu đã paid rồi thì không update lại
+  - KHÔNG dùng querystring.stringify - VNPay yêu cầu %20→+ encoding
+  - Localhost IP reject → dùng fallback IP public
+  - Timezone GMT+7 cho vnp_CreateDate
+  - Ngrok tunnel bắt buộc (VNPay không reach localhost)
+```
+
+#### VNPay Encoding Implementation (CRITICAL)
+
+**Code example - createVNPayUrl:**
+```javascript
+// Manual query string build (VNPay yêu cầu format đặc biệt)
+const sortedKeys = Object.keys(vnp_Params).sort();
+let signData = '';
+let urlParams = '';
+
+for (let i = 0; i < sortedKeys.length; i++) {
+  const key = sortedKeys[i];
+  const value = vnp_Params[key];
+  if (value !== undefined && value !== null && value !== '') {
+    const encodedKey = encodeURIComponent(key).replace(/%20/g, '+');
+    const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
+    
+    if (signData.length > 0) {
+      signData += '&' + encodedKey + '=' + encodedValue;
+      urlParams += '&' + encodedKey + '=' + encodedValue;
+    } else {
+      signData += encodedKey + '=' + encodedValue;
+      urlParams += encodedKey + '=' + encodedValue;
+    }
+  }
+}
+
+const hmac = crypto.createHmac('sha512', secretKey);
+const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+const finalUrl = vnpUrl + '?' + urlParams + '&vnp_SecureHash=' + signed;
+```
+
+**Lý do KHÔNG dùng querystring.stringify():**
+- VNPay yêu cầu space encode thành `+`, không phải `%20`
+- Default querystring.stringify encode thành `%20` → hash mismatch
+- Phải manual encode với `.replace(/%20/g, '+')`
+
+**Timezone GMT+7:**
+```javascript
+const tzOffset = 7 * 60 * 60 * 1000;
+const vnTime = new Date(date.getTime() + tzOffset);
+const createDate = vnTime.toISOString().replace(/[-T:.Z]/g, '').substring(0, 14);
+```
+
+**IP Fallback:**
+```javascript
+const finalIp = (ipAddr === '127.0.0.1' || ipAddr === '::1') ? '113.160.92.202' : ipAddr;
 ```
 
 **Checklist:**
 
 ```
-[ ] COD: tạo đơn thành công, payment_status = unpaid
-[ ] Bank: trang hướng dẫn CK hiển thị đủ thông tin
-[ ] Admin xác nhận CK thủ công được
-[ ] VNPay sandbox: tạo URL đúng, verify hash, cập nhật DB đúng
-[ ] Không có 2 payment record cho 1 order
-[ ] payment.paid_at được set đúng thời điểm
+[x] COD: tạo đơn thành công, payment_status = unpaid
+[x] Bank: trang hướng dẫn CK hiển thị đủ thông tin
+[x] Admin xác nhận CK thủ công được
+[x] VNPay sandbox: tạo URL đúng, verify hash, cập nhật DB đúng
+[x] VNPay encoding: %20→+, manual build, không dùng querystring.stringify
+[x] VNPay timezone GMT+7, IP fallback cho localhost
+[x] VNPay OrderType = 'billpayment'
+[x] Không có 2 payment record cho 1 order
+[x] payment.paid_at được set đúng thời điểm
+[x] Ngrok tunnel cho VNPay callback (app tự động fetch ngrok URL)
 ```
 
 ---

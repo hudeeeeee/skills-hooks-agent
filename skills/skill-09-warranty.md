@@ -243,3 +243,18 @@ const WARRANTY_STATUS_LABEL = {
 ```
 
 ## Sau khi xong: `bash hooks/hook-10-qa.sh 09`
+
+---
+
+## Test Cases — Warranty
+
+| ID | Input | Expected |
+|----|-------|----------|
+| TC59 | POST /warranty: đơn completed, sản phẩm còn hạn BH | warranty_request tạo thành công |
+| TC60 | POST /warranty: đơn status=shipping | 403, không gửi được |
+| TC61 | POST /warranty: warranty_months đã hết hạn | Flash "Hết thời hạn bảo hành" |
+| TC62 | POST /warranty: product không trong order | 403 |
+| TC63 | Admin PATCH status=approved | Status cập nhật pending→approved |
+| TC64 | Admin PATCH status=completed từ pending (bỏ qua approved) | Lỗi transition không hợp lệ |
+| TC65 | Admin PATCH status=rejected | Status cập nhật pending→rejected |
+| TC66 | Admin ghi admin_note | Ghi chú lưu vào DB, hiển thị cho admin |
