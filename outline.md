@@ -119,9 +119,10 @@ Outline báo cáo chính xác dựa trên **BaoCao_DATN_FINAL.docx**.
 3.7. Hướng dẫn cài đặt và chạy hệ thống
   - 3.7.1. Yêu cầu phần mềm
   - 3.7.2. Các bước cài đặt cơ bản
-  - 3.7.3. Cài đặt VNPay Sandbox với Ngrok
-  - 3.7.4. Kiểm thử thanh toán VNPay Sandbox
-  - 3.7.5. Triển khai bằng Docker
+  - 3.7.3. Chuẩn bị lại seed data từ crawler (nếu cần tái tạo)
+  - 3.7.4. Cài đặt VNPay Sandbox với Ngrok
+  - 3.7.5. Kiểm thử thanh toán VNPay Sandbox
+  - 3.7.6. Triển khai bằng Docker
 
 ## CHƯƠNG 4: KIỂM THỬ VÀ ĐÁNH GIÁ
 
@@ -331,6 +332,7 @@ Hệ thống được chia thành 13 skill theo thứ tự build bắt buộc:
 
 | Bước | Nội dung |
 | ---- | -------- |
+| Chuẩn bị | Crawl dữ liệu sản phẩm thực tế từ cellphones.com.vn bằng `crawler.py` → sinh `products_raw.json` → convert sang seed data |
 | 00 | Cài đặt package, tạo thư mục, cấu hình `.env`, MySQL |
 | 01 | Thiết lập project, layout EJS, cấu trúc thư mục |
 | 02 | Thiết kế database schema và seed data |
@@ -763,6 +765,8 @@ project-root/
 ├── database/
 │   ├── schema.sql
 │   └── seed.sql
+├── crawler.py          # Scrapy spider crawl cellphones.com.vn → products_raw.json
+├── products_raw.json   # Output crawler, dùng để tạo seed data
 ├── app.js
 ├── server.js
 ├── .env
@@ -818,7 +822,41 @@ Form mô tả lỗi từ trang chi tiết đơn hàng. Kiểm tra sản phẩm c
 
 ### 3.3.11. Dữ liệu sản phẩm mẫu trong hệ thống
 
-Seed data gồm sản phẩm các thương hiệu Apple, Samsung, Sony, ASUS, Dell, LG, Xiaomi, JBL, Canon. Tài khoản mặc định: admin (admin@electroshop.com) và customer mẫu.
+Seed data được chuẩn bị qua hai nguồn, tổng cộng **121 sản phẩm** thuộc 10 danh mục:
+
+#### Nguồn 1 — Seed thủ công (`database/seed.sql`)
+
+56 sản phẩm được nhập tay đại diện đa dạng danh mục: Máy lạnh, Máy giặt, Tivi, Điện thoại, Laptop, Tablet, Tủ lạnh, Nồi cơm điện, Nồi chiên không dầu, Bếp điện. Các thương hiệu: Samsung, LG, Sharp, Toshiba, Apple, ASUS, Lenovo, HP. Mỗi sản phẩm kèm 3–5 ảnh local (`/img/products/PXX/`), description HTML, specifications JSON và thông tin bảo hành.
+
+#### Nguồn 2 — Crawl tự động (`crawler.py` + `import_crawled.py`)
+
+65 sản phẩm thực tế crawl từ **cellphones.com.vn** bổ sung vào danh mục **Điện thoại** (37 sản phẩm) và **Laptop** (28 sản phẩm).
+
+**Quy trình crawl:**
+
+| Bước | Công việc | Công cụ |
+| ---- | --------- | ------- |
+| 1 | Crawl danh mục mobile, laptop từ cellphones.com.vn (tối đa 5 trang/danh mục) | Scrapy |
+| 2 | Lấy đầy đủ thông tin từng trang chi tiết sản phẩm | XPath/CSS selector |
+| 3 | Sinh `products_raw.json` — 65 bản ghi | Scrapy FEEDS |
+| 4 | Đọc JSON, fix category_id, escape SQL, INSERT vào DB | `import_crawled.py` |
+| 5 | Append INSERT block vào `database/seed.sql` | Python |
+
+**Dữ liệu thu thập được cho mỗi sản phẩm:**
+
+| Trường | Nguồn trên trang | Ghi chú |
+| ------ | --------------- | ------- |
+| `name` | `div.box-product-name > h1` | |
+| `price` | `.base-price` | Giá gốc |
+| `sale_price` | `.sale-price` | Giá khuyến mãi (nếu có) |
+| `brand` | Trích xuất từ tên + alias table | iPhone→Apple, Redmi→Xiaomi |
+| `description` | `div#cpsContentSEO` | Giữ nguyên HTML |
+| `specifications` | `tr.technical-content-item` | Lưu dạng JSON string |
+| `warranty_months` | Regex "N tháng/năm" trong trang | Mặc định 12 nếu không tìm thấy |
+| `images` | CDN URL từ pattern `plain/` | Tối đa 5 ảnh/sản phẩm, 307 ảnh tổng |
+| `slug` | `slugify(name)` — xử lý tiếng Việt | |
+
+**Lưu ý kỹ thuật:** Cột `description` phải là `MEDIUMTEXT` (một số description HTML vượt 65.535 bytes, ví dụ iPhone 17 Pro: 83.910 bytes). Schema đã được cập nhật tương ứng.
 
 ---
 
@@ -958,9 +996,64 @@ mysql -u root -p < database/seed.sql
 npm start
 ```
 
+`database/seed.sql` đã bao gồm toàn bộ 121 sản phẩm (seed thủ công + crawled). Không cần chạy thêm bước nào.
+
 Tài khoản mặc định sau seed:
-* Admin: `admin@electroshop.com` / `Admin@123`
-* Customer: `customer@test.com` / `Customer@123`
+* Admin: `admin@electroshop.com` / `Admin@123456`
+* Customer: `an@example.com` / `Customer@123`
+
+### 3.7.3. Chuẩn bị lại seed data từ crawler (nếu cần tái tạo)
+
+Trong trường hợp cần crawl lại dữ liệu mới từ cellphones.com.vn (ví dụ sản phẩm đã thay đổi giá, thêm sản phẩm mới), thực hiện theo các bước sau:
+
+**Bước 1 — Chạy crawler:**
+
+```bash
+pip install scrapy        # Cài Scrapy nếu chưa có
+python3 crawler.py        # Crawl → sinh products_raw.json
+```
+
+`crawler.py` crawl hai danh mục điện thoại và laptop từ cellphones.com.vn, tối đa 5 trang/danh mục, `DOWNLOAD_DELAY=1s` để tránh bị chặn. Output: `products_raw.json`.
+
+**Bước 2 — Import vào DB và cập nhật seed:**
+
+```bash
+python3 import_crawled.py
+```
+
+Script thực hiện:
+1. Đọc `products_raw.json`
+2. Map category: mobile → `category_id=4` (Điện thoại), laptop → `category_id=5` (Laptop)
+3. Kiểm tra slug trùng với sản phẩm hiện có, tự thêm suffix nếu conflict
+4. Sinh câu lệnh `INSERT INTO products` và `INSERT INTO product_images` với escaped SQL đúng chuẩn
+5. Chạy INSERT trực tiếp vào DB đang kết nối
+6. Append block SQL vào `database/seed.sql` để các máy khác pull về có đủ dữ liệu
+
+**Cấu hình kết nối trong `import_crawled.py`:**
+
+```python
+DB_USER = 'admin123'
+DB_PASS = 'admin123'
+DB_NAME = 'electronics_shop'
+PORT    = '3306'    # Đổi thành '3307' nếu dùng Docker
+```
+
+**Lưu ý schema:** Cột `description` trong bảng `products` phải là `MEDIUMTEXT` (không phải `TEXT`) vì một số description HTML từ cellphones.com.vn có kích thước vượt 65.535 bytes. Schema đã được cập nhật. Nếu chạy trên DB cũ chưa migrate:
+
+```sql
+ALTER TABLE products MODIFY COLUMN description MEDIUMTEXT;
+```
+
+**Kết quả sau khi chạy xong:**
+
+| Hạng mục | Số lượng |
+| -------- | -------- |
+| Tổng sản phẩm trong DB | 121 |
+| Seed thủ công (10 danh mục) | 56 |
+| Crawled từ cellphones.com.vn | 65 |
+| Ảnh sản phẩm crawled | 307 |
+| Danh mục Điện thoại (cat 4) | 42 sản phẩm |
+| Danh mục Laptop (cat 5) | 33 sản phẩm |
 
 ### 3.7.3. Cài đặt VNPay Sandbox với Ngrok
 
@@ -1192,5 +1285,6 @@ BANK_ACCOUNT_NUMBER=0417934401
 
 | Vai trò | Email | Mật khẩu |
 | ------- | ----- | -------- |
-| Admin | admin@electroshop.com | Admin@123 |
-| Customer | customer@test.com | Customer@123 |
+| Admin | admin@electroshop.com | Admin@123456 |
+| Customer (1) | an@example.com | Customer@123 |
+| Customer (2) | binh@example.com | Customer@123 |
